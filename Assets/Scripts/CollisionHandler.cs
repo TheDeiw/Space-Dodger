@@ -4,10 +4,14 @@ public class CollisionHandler : MonoBehaviour
 {
     [SerializeField] GameObject destroyVFX;
 
-    void OnTriggerEnter(Collider other)
+    void OnParticleCollision(GameObject other)
     {
-        Debug.Log(other.gameObject.name);
-        Instantiate(destroyVFX, transform.position, Quaternion.identity);
-        Destroy(gameObject);
+        if (other.CompareTag("PlayerLaser"))
+        {
+            Debug.Log(other.name);
+            Instantiate(destroyVFX, transform.position, Quaternion.identity);
+            Destroy(gameObject);
+            Destroy(other.gameObject);
+        }
     }
 }

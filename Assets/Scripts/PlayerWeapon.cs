@@ -5,28 +5,15 @@ using UnityEngine.InputSystem;
 
 public class PlayerWeapon : MonoBehaviour
 {
-    bool isFiring = false;
     [SerializeField] GameObject laser;
+    [SerializeField] Transform spawnPoint;
+    
 
-    void Start()
-    {
-        //Cursor.visible = false;
-    }
-
-    void Update()
-    {
-        FiringProcess();
-    }
-
-    void FiringProcess()
-    {
-        var particleEmission = laser.GetComponent<ParticleSystem>().emission;
-        particleEmission.enabled = isFiring;
-    }
-
+    // OnAttack records the input, but doesn't spawn yet
     void OnAttack(InputValue value)
     {
-        isFiring = value.isPressed;
+        GameObject newLaser = Instantiate(laser, spawnPoint.position, spawnPoint.rotation);
+        newLaser.transform.SetParent(spawnPoint); 
     }
     
 }
