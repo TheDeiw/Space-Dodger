@@ -8,7 +8,6 @@ public class CollisionHandler : MonoBehaviour
     {
         if (other.CompareTag("PlayerLaser"))
         {
-            Debug.Log(other.name);
             Instantiate(destroyVFX, transform.position, Quaternion.identity);
             Destroy(gameObject);
             Destroy(other.gameObject);

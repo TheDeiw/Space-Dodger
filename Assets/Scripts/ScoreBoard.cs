@@ -13,14 +13,20 @@ public class ScoreBoard : MonoBehaviour
         UpdateScoreText();
     }
     
-    public void IncreaseScore(int amount)
+    public void IncreaseScore()
     {
-        _score += amount;
+        _score ++;
         UpdateScoreText();
     }
     
     private void UpdateScoreText()
     {
-        scoreText.text = _score.ToString();
+        scoreText.text = "Score: " + _score.ToString();
+    }
+    
+    public  void ResetScore()
+    {
+        _score = 0;
+        UpdateScoreText();
     }
 }

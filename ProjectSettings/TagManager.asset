@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - PlayerLaser
+  - Obstacle
+  - Star
   layers:
   - Default
   - TransparentFX
