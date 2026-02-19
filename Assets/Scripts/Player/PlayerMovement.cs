@@ -14,6 +14,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float controlPitch = 20f;
     [SerializeField] float rotationSpeed = 20f;
 
+    [SerializeField] private GameObject playerModel;
+
     void Update()
     {
         ProcessTranslation();
@@ -37,7 +39,7 @@ public class PlayerMovement : MonoBehaviour
     {
         Quaternion rotationRollAngle = Quaternion.Euler(0f, 0f, movementInput.x * -controlRoll);
         Quaternion rotationPitchAngle = Quaternion.Euler(movementInput.y * -controlPitch, 0f, 0f);
-        transform.localRotation = Quaternion.Lerp(transform.localRotation, rotationRollAngle * rotationPitchAngle, rotationSpeed * Time.deltaTime);
+        playerModel.transform.localRotation = Quaternion.Lerp(playerModel.transform.localRotation, rotationRollAngle * rotationPitchAngle, rotationSpeed * Time.deltaTime);
     }
 
     public void OnMove(InputValue value)

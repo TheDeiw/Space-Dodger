@@ -290,7 +290,7 @@ Camera:
   m_ShutterSpeed: 0.005
   m_Aperture: 16
   m_FocusDistance: 10
-  m_FocalLength: 50
+  m_FocalLength: 20.78461
   m_BladeCount: 5
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
@@ -305,9 +305,9 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 60.000004
   orthographic: 0
-  orthographic size: 5
+  orthographic size: 39.27
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -503,6 +503,11 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+--- !u!1 &623199232 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3811856278793261482, guid: dd886ddb363aabd4eb08660a8c305bf2, type: 3}
+  m_PrefabInstance: {fileID: 2796403226146588015}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &670349557
 GameObject:
   m_ObjectHideFlags: 0
@@ -720,7 +725,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 960.00006, y: -62.695}
+  m_AnchoredPosition: {x: 960.00006, y: -62.694946}
   m_SizeDelta: {x: 1920, y: 125.39}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &924002249
@@ -1033,6 +1038,10 @@ PrefabInstance:
       propertyPath: m_IsTrigger
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6075112403151174898, guid: dd886ddb363aabd4eb08660a8c305bf2, type: 3}
+      propertyPath: playerModel
+      value: 
+      objectReference: {fileID: 623199232}
     - target: {fileID: 6075112403151174898, guid: dd886ddb363aabd4eb08660a8c305bf2, type: 3}
       propertyPath: xClampedRange
       value: 50
