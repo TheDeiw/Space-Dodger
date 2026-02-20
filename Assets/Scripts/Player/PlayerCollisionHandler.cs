@@ -7,21 +7,28 @@ public class PlayerCollisionHandler : MonoBehaviour
     [SerializeField] private ScoreBoard scoreBoard;
     [SerializeField] private GameObject explosionVFX;
     
+    [SerializeField] private SpaceshipAgent agent;
+    
     void OnTriggerEnter(Collider other)
     {
+        bool isTraining = agent != null && agent.IsTraining;
+        
         if (other.CompareTag("Star"))
         {
-            scoreBoard.IncreaseScore();
+            if (agent != null) agent.RewardStar();
+            
+            if (!isTraining) scoreBoard.IncreaseScore();
             Destroy(other.gameObject);
             Instantiate(explosionVFX, other.transform.position, other.transform.rotation);
         }
         else if (other.CompareTag("Obstacle"))
         {
-            scoreBoard.ResetScore();
+            if (!isTraining) scoreBoard.ResetScore();
             Instantiate(explosionVFX, other.transform.position, other.transform.rotation);
             Destroy(other.gameObject);
             
-            ResetPlayerPosition();
+            if (agent != null) agent.Crash();
+            //ResetPlayerPosition();
         }
     }
 

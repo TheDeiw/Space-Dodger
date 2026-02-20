@@ -1,0 +1,29 @@
+{
+    "Spaceship": {
+        "checkpoints": [
+            {
+                "steps": 7599,
+                "file_path": "results\\test\\Spaceship\\Spaceship-7599.onnx",
+                "reward": 9.232951377119337,
+                "creation_time": 1771614178.674645,
+                "auxillary_file_paths": [
+                    "results\\test\\Spaceship\\Spaceship-7599.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 7599,
+            "file_path": "results\\test\\Spaceship.onnx",
+            "reward": 9.232951377119337,
+            "creation_time": 1771614178.674645,
+            "auxillary_file_paths": [
+                "results\\test\\Spaceship\\Spaceship-7599.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

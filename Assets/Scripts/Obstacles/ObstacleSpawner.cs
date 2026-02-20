@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ObstacleSpawner : MonoBehaviour
@@ -22,6 +23,9 @@ public class ObstacleSpawner : MonoBehaviour
 
     private bool isSpawning = true;
     private Bounds spawnBounds;
+    
+    // Track all spawned objects so we can clear them on episode reset
+    private List<GameObject> spawnedObjects = new List<GameObject>();
 
     void Start()
     {
@@ -61,12 +65,9 @@ public class ObstacleSpawner : MonoBehaviour
         GameObject prefabToSpawn = obstaclePrefabs[randomIndex];
 
         // 2. Calculate Random Position based on the Plane's bounds
-        // We use the Plane's X width, but we keep the Z fixed at the far end of the plane
         float randomX = Random.Range(spawnBounds.min.x, spawnBounds.max.x);
         float randomY = Random.Range(spawnBounds.min.y, spawnBounds.max.y);
         
-        // If you want them to spawn vertically relative to the plane, usually Y is slightly offset
-        // Adjust this if your plane is flat on Y=0
         Vector3 spawnPos = new Vector3(randomX, randomY, spawnBounds.max.z);
         
         // 3. Instantiate with random angle
@@ -85,5 +86,34 @@ public class ObstacleSpawner : MonoBehaviour
         if (mover == null) mover = instance.AddComponent<ObstacleMover>();
         
         mover.Initialize(randomSpeed, destroyZPos);
+        
+        // Track the spawned object
+        spawnedObjects.Add(instance);
+    }
+
+    /// <summary>
+    /// Destroys all spawned obstacles and stars. Called by SpaceshipAgent on episode reset.
+    /// </summary>
+    public void ClearAllObstacles()
+    {
+        // Clean up null references (already destroyed objects) and destroy the rest
+        for (int i = spawnedObjects.Count - 1; i >= 0; i--)
+        {
+            if (spawnedObjects[i] != null)
+            {
+                Destroy(spawnedObjects[i]);
+            }
+        }
+        spawnedObjects.Clear();
+        
+        // Also destroy any remaining tagged objects that might have been missed
+        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Obstacle"))
+        {
+            Destroy(obj);
+        }
+        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Star"))
+        {
+            Destroy(obj);
+        }
     }
 }
