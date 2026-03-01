@@ -4,24 +4,30 @@ public class ObstacleMover : MonoBehaviour
 {
     private float moveSpeed;
     private float destroyZThreshold;
+    private SpaceshipAgent _agent; 
 
-    // This method is called by the Spawner immediately after creating this object
-    public void Initialize(float speed, float destroyZ)
+    // Update this signature to accept the agent
+    public void Initialize(float speed, float destroyZ, SpaceshipAgent agent)
     {
         moveSpeed = speed;
         destroyZThreshold = destroyZ;
+        _agent = agent; // Store the local agent!
     }
 
     void Update()
     {
         // Move backwards (relative to world or player direction)
-        // Vector3.back is (0, 0, -1)
         transform.Translate(Vector3.back * moveSpeed * Time.deltaTime, Space.World);
 
         // CLEANUP LOGIC:
-        // If the object passes the threshold behind the player, destroy it.
         if (transform.position.z < destroyZThreshold)
         {
+            // NEW: If this object is a star, penalize the agent before deleting it
+            if (gameObject.CompareTag("Star") && _agent != null)
+            {
+                _agent.MissedStar();
+            }
+            
             Destroy(gameObject);
         }
     }

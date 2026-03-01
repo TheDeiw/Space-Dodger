@@ -1,0 +1,65 @@
+{
+    "Spaceship": {
+        "checkpoints": [
+            {
+                "steps": 8499988,
+                "file_path": "results\\overnightTrain\\Spaceship\\Spaceship-8499988.onnx",
+                "reward": -0.7132272436532355,
+                "creation_time": 1772353740.9302258,
+                "auxillary_file_paths": [
+                    "results\\overnightTrain\\Spaceship\\Spaceship-8499988.pt"
+                ]
+            },
+            {
+                "steps": 8999949,
+                "file_path": "results\\overnightTrain\\Spaceship\\Spaceship-8999949.onnx",
+                "reward": -0.5691050569477835,
+                "creation_time": 1772355033.524869,
+                "auxillary_file_paths": [
+                    "results\\overnightTrain\\Spaceship\\Spaceship-8999949.pt"
+                ]
+            },
+            {
+                "steps": 9499964,
+                "file_path": "results\\overnightTrain\\Spaceship\\Spaceship-9499964.onnx",
+                "reward": -0.6556123507519563,
+                "creation_time": 1772356304.4184957,
+                "auxillary_file_paths": [
+                    "results\\overnightTrain\\Spaceship\\Spaceship-9499964.pt"
+                ]
+            },
+            {
+                "steps": 9999954,
+                "file_path": "results\\overnightTrain\\Spaceship\\Spaceship-9999954.onnx",
+                "reward": -0.6201929052236613,
+                "creation_time": 1772357558.922498,
+                "auxillary_file_paths": [
+                    "results\\overnightTrain\\Spaceship\\Spaceship-9999954.pt"
+                ]
+            },
+            {
+                "steps": 10014603,
+                "file_path": "results\\overnightTrain\\Spaceship\\Spaceship-10014603.onnx",
+                "reward": -0.6883341760064164,
+                "creation_time": 1772357654.9998786,
+                "auxillary_file_paths": [
+                    "results\\overnightTrain\\Spaceship\\Spaceship-10014603.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 10014603,
+            "file_path": "results\\overnightTrain\\Spaceship.onnx",
+            "reward": -0.6883341760064164,
+            "creation_time": 1772357654.9998786,
+            "auxillary_file_paths": [
+                "results\\overnightTrain\\Spaceship\\Spaceship-10014603.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

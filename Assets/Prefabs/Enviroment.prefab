@@ -67,6 +67,8 @@ MonoBehaviour:
   starDestroyedPenalty: -0.5
   survivalRewardPerStep: 0.001
   movingTowardsStarReward: 0.01
+  shootPenalty: -0.01
+  missedStarPenalty: -0.05
   obstacleSpawner: {fileID: 8519811447762515123}
 --- !u!114 &5875363370664296682
 MonoBehaviour:
@@ -81,7 +83,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 5
+    VectorObservationSize: 32
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -211,6 +213,7 @@ MonoBehaviour:
   laser: {fileID: 4415515982561175747, guid: 8bd1ada2067cefe41a7120da84edbd7c, type: 3}
   spawnPoint: {fileID: 4787645455042196362}
   fireRate: 0.3
+  localAgent: {fileID: 1556089780380418184}
 --- !u!114 &7971885356364097368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -374,6 +377,7 @@ MonoBehaviour:
   minSpeed: 100
   maxSpeed: 400
   destroyZPos: -60
+  localAgent: {fileID: 1556089780380418184}
 --- !u!1 &3289446478347447136
 GameObject:
   m_ObjectHideFlags: 0

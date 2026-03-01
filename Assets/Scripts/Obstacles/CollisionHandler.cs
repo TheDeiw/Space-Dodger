@@ -3,14 +3,14 @@ using UnityEngine;
 public class CollisionHandler : MonoBehaviour
 {
     [SerializeField] GameObject destroyVFX;
-    
+
     // Reference to the agent so we can give rewards/penalties for laser hits
+    // Set by ObstacleSpawner (for obstacles/stars) or PlayerWeapon (for lasers)
     private SpaceshipAgent _agent;
 
-    void Start()
+    public void SetShooter(SpaceshipAgent agent)
     {
-        // Find the agent in the scene (there should be one on the player)
-        _agent = FindAnyObjectByType<SpaceshipAgent>();
+        _agent = agent;
     }
 
     void OnParticleCollision(GameObject other)

@@ -37,17 +37,20 @@ public class SpaceshipAgent : Agent
     [Header("Reward Settings")]
     [SerializeField] private float starCollectReward = 1.0f;
     [SerializeField] private float crashPenalty = -1.0f;
-    [SerializeField] private float obstacleDestroyedReward = 0.5f;
-    [SerializeField] private float starDestroyedPenalty = -0.5f;
+    [SerializeField] private float obstacleDestroyedReward = 0.3f;
+    [SerializeField] private float starDestroyedPenalty = -0.3f;
     [SerializeField] private float survivalRewardPerStep = 0.001f;
-    [SerializeField] private float movingTowardsStarReward = 0.01f;
+    [SerializeField] private float movingTowardsStarReward = 0.005f;
+    [SerializeField] private float shootPenalty = -0.002f;
+    [SerializeField] private float missedStarPenalty = -0.05f;
+
 
     [Header("Episode Settings")]
     [SerializeField] private ObstacleSpawner obstacleSpawner;
 
-    // Cached clamp ranges (should match PlayerMovement values)
-    private float _xRange = 30f;
-    private float _yRange = 25f;
+    // Clamp ranges — synced from PlayerMovement in Initialize()
+    private float _xRange;
+    private float _yRange;
 
     public override void Initialize()
     {
@@ -55,6 +58,10 @@ public class SpaceshipAgent : Agent
         _playerWeapon = GetComponent<PlayerWeapon>();
         _behaviorParameters = GetComponent<BehaviorParameters>();
         _startingPosition = transform.localPosition;
+
+        // Sync observation normalization with actual movement clamp ranges
+        _xRange = _playerMovement.XClampedRange;
+        _yRange = _playerMovement.YClampedRange;
     }
 
     public override void OnEpisodeBegin()
@@ -95,6 +102,7 @@ public class SpaceshipAgent : Agent
         if (shoot == 1)
         {
             _playerWeapon.FireWeapon();
+            AddReward(shootPenalty);
         }
 
         // Small survival reward to encourage staying alive
@@ -208,12 +216,19 @@ public class SpaceshipAgent : Agent
         AddReward(starDestroyedPenalty);
     }
 
+    public void MissedStar()
+    {
+        AddReward(missedStarPenalty);
+    }
+
     // ==================== HELPER METHODS ====================
     private List<GameObject> GetNearestObjectsWithTag(string objectTag, int maxCount)
     {
-        GameObject[] allObjects = GameObject.FindGameObjectsWithTag(objectTag);
-        return allObjects
-            .Where(obj => obj != null)
+        // Query ONLY objects spawned by the local spawner (no cross-environment contamination)
+        if (obstacleSpawner == null) return new List<GameObject>();
+
+        return obstacleSpawner.SpawnedObjects
+            .Where(obj => obj != null && obj.CompareTag(objectTag))
             .OrderBy(obj => Vector3.Distance(transform.position, obj.transform.position))
             .Where(obj => Vector3.Distance(transform.position, obj.transform.position) <= detectionRange)
             .Take(maxCount)
@@ -222,13 +237,15 @@ public class SpaceshipAgent : Agent
 
     private GameObject FindNearestWithTag(string objectTag)
     {
-        GameObject[] allObjects = GameObject.FindGameObjectsWithTag(objectTag);
-        GameObject nearest = null;
-        float minDist = Mathf.Infinity;
+        // Local-only query with detection range cap
+        if (obstacleSpawner == null) return null;
 
-        foreach (GameObject obj in allObjects)
+        GameObject nearest = null;
+        float minDist = detectionRange;
+
+        foreach (GameObject obj in obstacleSpawner.SpawnedObjects)
         {
-            if (obj == null) continue;
+            if (obj == null || !obj.CompareTag(objectTag)) continue;
             float dist = Vector3.Distance(transform.position, obj.transform.position);
             if (dist < minDist)
             {

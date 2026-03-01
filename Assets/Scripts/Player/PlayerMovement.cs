@@ -13,6 +13,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _xClampedRange = 30f;
     [SerializeField] private float _yClampedRange = 25f;
 
+    public float XClampedRange => _xClampedRange;
+    public float YClampedRange => _yClampedRange;
+
     [SerializeField] private float _controlRoll = 20f;
     [SerializeField] private float _controlPitch = 20f;
     [SerializeField] private float _rotationSpeed = 20f;
@@ -24,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
         ProcessTranslation();
         ProcessRotation();
     }
-    
+
     public void SetMovementInput(Vector2 newMovement)
     {
         _movementInput = newMovement;

@@ -21,11 +21,17 @@ public class ObstacleSpawner : MonoBehaviour
     [Tooltip("The Z position behind the player where objects get deleted")]
     [SerializeField] float destroyZPos = -20f;
 
+    [Header("Agent Reference")]
+    [SerializeField] private SpaceshipAgent localAgent;
+
     private bool isSpawning = true;
     private Bounds spawnBounds;
-    
+
     // Track all spawned objects so we can clear them on episode reset
     private List<GameObject> spawnedObjects = new List<GameObject>();
+
+    // Public read-only accessor for SpaceshipAgent to query local objects
+    public IReadOnlyList<GameObject> SpawnedObjects => spawnedObjects;
 
     void Start()
     {
@@ -60,6 +66,9 @@ public class ObstacleSpawner : MonoBehaviour
     {
         if (obstaclePrefabs.Length == 0) return;
 
+        // Prune destroyed objects to prevent list bloat
+        spawnedObjects.RemoveAll(obj => obj == null);
+
         // 1. Pick a random object
         int randomIndex = Random.Range(0, obstaclePrefabs.Length);
         GameObject prefabToSpawn = obstaclePrefabs[randomIndex];
@@ -67,9 +76,9 @@ public class ObstacleSpawner : MonoBehaviour
         // 2. Calculate Random Position based on the Plane's bounds
         float randomX = Random.Range(spawnBounds.min.x, spawnBounds.max.x);
         float randomY = Random.Range(spawnBounds.min.y, spawnBounds.max.y);
-        
+
         Vector3 spawnPos = new Vector3(randomX, randomY, spawnBounds.max.z);
-        
+
         // 3. Instantiate with random angle
         Quaternion randomRotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
         GameObject instance = Instantiate(prefabToSpawn, spawnPos, randomRotation);
@@ -80,13 +89,20 @@ public class ObstacleSpawner : MonoBehaviour
 
         // 5. Apply Random Speed & Initialize
         float randomSpeed = Random.Range(minSpeed, maxSpeed);
-        
+
         // Ensure the prefab has the Mover script
         ObstacleMover mover = instance.GetComponent<ObstacleMover>();
         if (mover == null) mover = instance.AddComponent<ObstacleMover>();
-        
-        mover.Initialize(randomSpeed, destroyZPos);
-        
+
+        mover.Initialize(randomSpeed, destroyZPos, localAgent);
+
+        // Initialize the CollisionHandler with the local agent reference
+        CollisionHandler collisionHandler = instance.GetComponent<CollisionHandler>();
+        if (collisionHandler != null)
+        {
+            collisionHandler.SetShooter(localAgent);
+        }
+
         // Track the spawned object
         spawnedObjects.Add(instance);
     }
@@ -96,7 +112,7 @@ public class ObstacleSpawner : MonoBehaviour
     /// </summary>
     public void ClearAllObstacles()
     {
-        // Clean up null references (already destroyed objects) and destroy the rest
+        // Clean up ONLY the objects spawned by THIS specific spawner
         for (int i = spawnedObjects.Count - 1; i >= 0; i--)
         {
             if (spawnedObjects[i] != null)
@@ -104,16 +120,11 @@ public class ObstacleSpawner : MonoBehaviour
                 Destroy(spawnedObjects[i]);
             }
         }
+
+        // Empty the list so it is fresh for the next episode
         spawnedObjects.Clear();
-        
-        // Also destroy any remaining tagged objects that might have been missed
-        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Obstacle"))
-        {
-            Destroy(obj);
-        }
-        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Star"))
-        {
-            Destroy(obj);
-        }
+
+        // REMOVED: GameObject.FindGameObjectsWithTag() 
+        // We never use global searches in parallel ML-Agents!
     }
 }

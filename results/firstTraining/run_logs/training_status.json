@@ -1,0 +1,47 @@
+{
+    "Spaceship": {
+        "checkpoints": [
+            {
+                "steps": 330536,
+                "file_path": "results\\firstTraining\\Spaceship\\Spaceship-330536.onnx",
+                "reward": 2.1861466919071972,
+                "creation_time": 1772330921.248998,
+                "auxillary_file_paths": [
+                    "results\\firstTraining\\Spaceship\\Spaceship-330536.pt"
+                ]
+            },
+            {
+                "steps": 499967,
+                "file_path": "results\\firstTraining\\Spaceship\\Spaceship-499967.onnx",
+                "reward": -1.3119780985638498,
+                "creation_time": 1772331797.8081896,
+                "auxillary_file_paths": [
+                    "results\\firstTraining\\Spaceship\\Spaceship-499967.pt"
+                ]
+            },
+            {
+                "steps": 500031,
+                "file_path": "results\\firstTraining\\Spaceship\\Spaceship-500031.onnx",
+                "reward": -1.3119780985638498,
+                "creation_time": 1772331797.8771274,
+                "auxillary_file_paths": [
+                    "results\\firstTraining\\Spaceship\\Spaceship-500031.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 500031,
+            "file_path": "results\\firstTraining\\Spaceship.onnx",
+            "reward": -1.3119780985638498,
+            "creation_time": 1772331797.8771274,
+            "auxillary_file_paths": [
+                "results\\firstTraining\\Spaceship\\Spaceship-500031.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
