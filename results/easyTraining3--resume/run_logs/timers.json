@@ -1,0 +1,47 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1772467382",
+        "python_version": "3.10.12 | packaged by Anaconda, Inc. | (main, Jul  5 2023, 19:01:18) [MSC v.1916 64 bit (AMD64)]",
+        "command_line_arguments": "C:\\Users\\cheho\\miniconda3\\envs\\mlagents\\Scripts\\mlagents-learn config/spaceship_config.yaml --run-id=easyTraining3--resume",
+        "mlagents_version": "1.2.0.dev0",
+        "mlagents_envs_version": "1.2.0.dev0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.2.2+cu121",
+        "numpy_version": "1.23.5",
+        "end_time_seconds": "1772467400"
+    },
+    "total": 18.149605099999462,
+    "count": 1,
+    "self": 0.01440709998132661,
+    "children": {
+        "run_training.setup": {
+            "total": 0.08179020001261961,
+            "count": 1,
+            "self": 0.08179020001261961
+        },
+        "TrainerController.start_learning": {
+            "total": 18.053407800005516,
+            "count": 1,
+            "self": 0.0006351999909384176,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 18.052761300001293,
+                    "count": 1,
+                    "self": 18.052761300001293
+                },
+                "trainer_threads": {
+                    "total": 1.200009137392044e-06,
+                    "count": 1,
+                    "self": 1.200009137392044e-06
+                },
+                "TrainerController._save_models": {
+                    "total": 1.0100004146806896e-05,
+                    "count": 1,
+                    "self": 1.0100004146806896e-05
+                }
+            }
+        }
+    }
+}

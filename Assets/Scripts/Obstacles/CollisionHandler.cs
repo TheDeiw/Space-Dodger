@@ -17,20 +17,24 @@ public class CollisionHandler : MonoBehaviour
     {
         if (other.CompareTag("PlayerLaser"))
         {
-            Instantiate(destroyVFX, transform.position, Quaternion.identity);
-
-            // Reward or punish based on what the laser destroyed
-            if (_agent != null)
+            // Skip VFX during training for performance
+            if (_agent == null || !_agent.IsTraining)
             {
-                if (gameObject.CompareTag("Obstacle"))
-                {
-                    _agent.RewardObstacleDestroyed();
-                }
-                else if (gameObject.CompareTag("Star"))
-                {
-                    _agent.PenalizeStarDestroyed();
-                }
+                Instantiate(destroyVFX, transform.position, Quaternion.identity);
             }
+
+            // [DISABLED] Shooting rewards/penalties removed — agent cannot shoot in dodge-only mode
+            // if (_agent != null)
+            // {
+            //     if (gameObject.CompareTag("Obstacle"))
+            //     {
+            //         _agent.RewardObstacleDestroyed();
+            //     }
+            //     else if (gameObject.CompareTag("Star"))
+            //     {
+            //         _agent.PenalizeStarDestroyed();
+            //     }
+            // }
 
             Destroy(gameObject);
             Destroy(other.gameObject);

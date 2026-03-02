@@ -1,0 +1,74 @@
+{
+    "min_speed": {
+        "lesson_num": 1
+    },
+    "max_speed": {
+        "lesson_num": 1
+    },
+    "max_size": {
+        "lesson_num": 1
+    },
+    "Spaceship": {
+        "checkpoints": [
+            {
+                "steps": 1499920,
+                "file_path": "results\\improvedTraining5\\Spaceship\\Spaceship-1499920.onnx",
+                "reward": null,
+                "creation_time": 1772449526.0233986,
+                "auxillary_file_paths": [
+                    "results\\improvedTraining5\\Spaceship\\Spaceship-1499920.pt"
+                ]
+            },
+            {
+                "steps": 1517162,
+                "file_path": "results\\improvedTraining5\\Spaceship\\Spaceship-1517162.onnx",
+                "reward": 8.128583749135336,
+                "creation_time": 1772449560.45694,
+                "auxillary_file_paths": [
+                    "results\\improvedTraining5\\Spaceship\\Spaceship-1517162.pt"
+                ]
+            },
+            {
+                "steps": 1999940,
+                "file_path": "results\\improvedTraining5\\Spaceship\\Spaceship-1999940.onnx",
+                "reward": 2.123348518329508,
+                "creation_time": 1772450487.0540001,
+                "auxillary_file_paths": [
+                    "results\\improvedTraining5\\Spaceship\\Spaceship-1999940.pt"
+                ]
+            },
+            {
+                "steps": 2072025,
+                "file_path": "results\\improvedTraining5\\Spaceship\\Spaceship-2072025.onnx",
+                "reward": null,
+                "creation_time": 1772450577.550006,
+                "auxillary_file_paths": [
+                    "results\\improvedTraining5\\Spaceship\\Spaceship-2072025.pt"
+                ]
+            },
+            {
+                "steps": 2257396,
+                "file_path": "results\\improvedTraining5\\Spaceship\\Spaceship-2257396.onnx",
+                "reward": null,
+                "creation_time": 1772450847.0679145,
+                "auxillary_file_paths": [
+                    "results\\improvedTraining5\\Spaceship\\Spaceship-2257396.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 2257396,
+            "file_path": "results\\improvedTraining5\\Spaceship.onnx",
+            "reward": null,
+            "creation_time": 1772450847.0679145,
+            "auxillary_file_paths": [
+                "results\\improvedTraining5\\Spaceship\\Spaceship-2257396.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

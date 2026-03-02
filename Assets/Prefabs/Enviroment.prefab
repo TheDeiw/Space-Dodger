@@ -58,17 +58,11 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 5000
-  maxStarsToObserve: 5
   maxObstaclesToObserve: 5
   detectionRange: 80
-  starCollectReward: 1
   crashPenalty: -1
-  obstacleDestroyedReward: 0.5
-  starDestroyedPenalty: -0.5
-  survivalRewardPerStep: 0.001
-  movingTowardsStarReward: 0.01
-  shootPenalty: -0.01
-  missedStarPenalty: -0.05
+  survivalRewardPerStep: 0.01
+  dodgeRewardScale: 0.01
   obstacleSpawner: {fileID: 8519811447762515123}
 --- !u!114 &5875363370664296682
 MonoBehaviour:
@@ -83,12 +77,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 32
+    VectorObservationSize: 17
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 030000000300000002000000
-    VectorActionSize: 030000000300000002000000
+      BranchSizes: 0300000003000000
+    VectorActionSize: 0300000003000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -100,7 +94,7 @@ MonoBehaviour:
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_DeterministicInference: 0
-  m_ObservableAttributeHandling: 0
+  m_ObservableAttributeHandling: 2
 --- !u!114 &2917574477362914391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -369,13 +363,11 @@ MonoBehaviour:
   obstaclePrefabs:
   - {fileID: 5891973387289154926, guid: 415540e341b62b140abdb8ca3a1d3544, type: 3}
   - {fileID: 5768713855285261742, guid: 0630896f269ec024aa43fb791740f747, type: 3}
-  - {fileID: 7385247546422776666, guid: c337aab9300751c4396872f341271e48, type: 3}
   spawnOriginPlane: {fileID: 8646192258720663996}
-  spawnInterval: 0.3
-  minSize: 5
-  maxSize: 10
-  minSpeed: 100
-  maxSpeed: 400
+  spawnInterval: 0.2
+  minSize: 2
+  maxSize: 3
+  obstacleSpeed: 250
   destroyZPos: -60
   localAgent: {fileID: 1556089780380418184}
 --- !u!1 &3289446478347447136

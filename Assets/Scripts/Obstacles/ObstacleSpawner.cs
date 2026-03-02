@@ -1,21 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.MLAgents;
 
 public class ObstacleSpawner : MonoBehaviour
 {
     [Header("Spawn Settings")]
     [SerializeField] GameObject[] obstaclePrefabs;
     [SerializeField] Transform spawnOriginPlane; // Drag your floor/plane here
-    [SerializeField] float spawnInterval = 1f;
+    [SerializeField] float spawnInterval = 0.8f;
 
     [Header("Size Modifiers")]
-    [SerializeField] float minSize = 0.5f;
-    [SerializeField] float maxSize = 2.0f;
+    [SerializeField] float minSize = 1f;
+    [SerializeField] float maxSize = 2f;
 
-    [Header("Speed Modifiers")]
-    [SerializeField] float minSpeed = 10f;
-    [SerializeField] float maxSpeed = 30f;
+    [Header("Speed")]
+    // [DISABLED] Random speed range removed — single fixed speed simplifies observations (no speed input needed)
+    // [SerializeField] float minSpeed = 60f;
+    // [SerializeField] float maxSpeed = 200f;
+    [SerializeField] float obstacleSpeed = 130f;
 
     [Header("Cleanup Settings")]
     [Tooltip("The Z position behind the player where objects get deleted")]
@@ -69,6 +72,12 @@ public class ObstacleSpawner : MonoBehaviour
         // Prune destroyed objects to prevent list bloat
         spawnedObjects.RemoveAll(obj => obj == null);
 
+        // [DISABLED] Curriculum removed — using fixed Inspector values for simpler training
+        // var envParams = Academy.Instance.EnvironmentParameters;
+        // float curMinSpeed = envParams.GetWithDefault("min_speed", minSpeed);
+        // float curMaxSpeed = envParams.GetWithDefault("max_speed", maxSpeed);
+        // float curMaxSize  = envParams.GetWithDefault("max_size", maxSize);
+
         // 1. Pick a random object
         int randomIndex = Random.Range(0, obstaclePrefabs.Length);
         GameObject prefabToSpawn = obstaclePrefabs[randomIndex];
@@ -83,18 +92,18 @@ public class ObstacleSpawner : MonoBehaviour
         Quaternion randomRotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
         GameObject instance = Instantiate(prefabToSpawn, spawnPos, randomRotation);
 
-        // 4. Apply Random Scale
+        // 4. Apply Random Scale (fixed range, no curriculum)
         float randomScale = Random.Range(minSize, maxSize);
         instance.transform.localScale = Vector3.one * randomScale;
 
-        // 5. Apply Random Speed & Initialize
-        float randomSpeed = Random.Range(minSpeed, maxSpeed);
+        // 5. Apply fixed speed & Initialize (single speed, no randomness — simplifies agent observations)
+        // float randomSpeed = Random.Range(minSpeed, maxSpeed);
 
         // Ensure the prefab has the Mover script
         ObstacleMover mover = instance.GetComponent<ObstacleMover>();
         if (mover == null) mover = instance.AddComponent<ObstacleMover>();
 
-        mover.Initialize(randomSpeed, destroyZPos, localAgent);
+        mover.Initialize(obstacleSpeed, destroyZPos, localAgent);
 
         // Initialize the CollisionHandler with the local agent reference
         CollisionHandler collisionHandler = instance.GetComponent<CollisionHandler>();

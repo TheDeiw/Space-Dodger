@@ -1524,6 +1524,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enviroment
       objectReference: {fileID: 0}
+    - target: {fileID: 5875363370664296682, guid: 4b94430336c16904db97dfeb913ff8dd, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 0e8266ff35b40064aa12d8b34381ae71, type: 3}
+    - target: {fileID: 5875363370664296682, guid: 4b94430336c16904db97dfeb913ff8dd, type: 3}
+      propertyPath: m_BehaviorType
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7971885356364097368, guid: 4b94430336c16904db97dfeb913ff8dd, type: 3}
       propertyPath: scoreBoard
       value: 

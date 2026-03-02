@@ -13,22 +13,23 @@ public class PlayerCollisionHandler : MonoBehaviour
     {
         bool isTraining = agent != null && agent.IsTraining;
         
-        if (other.CompareTag("Star"))
+        // [DISABLED] Star collection removed — dodge-only task, no stars spawned anymore
+        // if (other.CompareTag("Star"))
+        // {
+        //     if (agent != null) agent.RewardStar();
+        //     
+        //     if (!isTraining) scoreBoard.IncreaseScore();
+        //     Destroy(other.gameObject);
+        //     if (!isTraining) Instantiate(explosionVFX, other.transform.position, other.transform.rotation);
+        // }
+        // else
+        if (other.CompareTag("Obstacle"))
         {
-            if (agent != null) agent.RewardStar();
-            
-            if (!isTraining) scoreBoard.IncreaseScore();
-            Destroy(other.gameObject);
-            Instantiate(explosionVFX, other.transform.position, other.transform.rotation);
-        }
-        else if (other.CompareTag("Obstacle"))
-        {
-            if (!isTraining) scoreBoard.ResetScore();
-            Instantiate(explosionVFX, other.transform.position, other.transform.rotation);
+            if (!isTraining && scoreBoard != null) scoreBoard.ResetTimer();
+            if (!isTraining) Instantiate(explosionVFX, other.transform.position, other.transform.rotation);
             Destroy(other.gameObject);
             
             if (agent != null) agent.Crash();
-            //ResetPlayerPosition();
         }
     }
 
