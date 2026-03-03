@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 8545039723595674947}
   - component: {fileID: 7971885356364097368}
   - component: {fileID: 4713545448351918961}
+  - component: {fileID: 593752888503757330}
   m_Layer: 0
   m_Name: Player Ship
   m_TagString: Untagged
@@ -57,13 +58,17 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
-  maxObstaclesToObserve: 5
-  detectionRange: 80
+  MaxStep: 0
   crashPenalty: -1
-  survivalRewardPerStep: 0.01
-  dodgeRewardScale: 0.01
+  survivalRewardPerStep: 0.001
+  episodeCompletionBonus: 3
+  edgeZoneThreshold: 0.75
+  edgePenaltyPerStep: -0.003
+  centerZoneThreshold: 0.4
+  centerBonusPerStep: 0.0005
   obstacleSpawner: {fileID: 8519811447762515123}
+  maxStepsPerEpisode: 3000
+  maxObservationDistance: 50
 --- !u!114 &5875363370664296682
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77,7 +82,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 17
+    VectorObservationSize: 13
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -94,7 +99,7 @@ MonoBehaviour:
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_DeterministicInference: 0
-  m_ObservableAttributeHandling: 2
+  m_ObservableAttributeHandling: 0
 --- !u!114 &2917574477362914391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -207,7 +212,6 @@ MonoBehaviour:
   laser: {fileID: 4415515982561175747, guid: 8bd1ada2067cefe41a7120da84edbd7c, type: 3}
   spawnPoint: {fileID: 4787645455042196362}
   fireRate: 0.3
-  localAgent: {fileID: 1556089780380418184}
 --- !u!114 &7971885356364097368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -238,6 +242,35 @@ MonoBehaviour:
   DecisionPeriod: 5
   DecisionStep: 0
   TakeActionsBetweenDecisions: 1
+--- !u!114 &593752888503757330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 278745029997050407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bb6b867a41448888c1cd4f99643ad71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SensorName: ObstacleRaySensor
+  m_DetectableTags:
+  - Obstacle
+  m_RaysPerDirection: 4
+  m_MaxRayDegrees: 90
+  m_SphereCastRadius: 1.5
+  m_RayLength: 300
+  m_RayLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  m_ObservationStacks: 2
+  m_AlternatingRayOrder: 1
+  m_UseBatchedRaycasts: 0
+  rayHitColor: {r: 1, g: 0, b: 0, a: 1}
+  rayMissColor: {r: 1, g: 1, b: 1, a: 1}
+  m_StartVerticalOffset: 0
+  m_EndVerticalOffset: 5
 --- !u!1 &1215651866360686430
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,7 +402,7 @@ MonoBehaviour:
   maxSize: 3
   obstacleSpeed: 250
   destroyZPos: -60
-  localAgent: {fileID: 1556089780380418184}
+  environmentRoot: {fileID: 0}
 --- !u!1 &3289446478347447136
 GameObject:
   m_ObjectHideFlags: 0

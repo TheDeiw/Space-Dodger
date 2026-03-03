@@ -3,14 +3,10 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Policies;
-using System.Collections.Generic;
-using System.Linq;
 
 public class SpaceshipAgent : Agent
 {
     private PlayerMovement _playerMovement;
-    // [DISABLED] Shooting removed to simplify the task — agent only dodges obstacles now
-    // private PlayerWeapon _playerWeapon;
     private Vector3 _startingPosition;
     private BehaviorParameters _behaviorParameters;
 
@@ -27,52 +23,49 @@ public class SpaceshipAgent : Agent
         }
     }
 
-    [Header("Observation Settings")]
-    // [DISABLED] Stars removed from observations — task simplified to obstacle avoidance only
-    // [Tooltip("How many nearest stars to observe")]
-    // [SerializeField] private int maxStarsToObserve = 5;
-    [Tooltip("How many nearest obstacles to observe")]
-    [SerializeField] private int maxObstaclesToObserve = 5;
-    [Tooltip("Maximum detection range for observations")]
-    [SerializeField] private float detectionRange = 80f;
-    // [DISABLED] Speed observation removed — all obstacles now have a single fixed speed
-    // [Tooltip("Max possible object speed, used to normalize speed observations")]
-    // [SerializeField] private float maxObjectSpeed = 400f;
-
     [Header("Reward Settings")]
-    // [DISABLED] Star-related rewards removed — no stars in simplified dodging task
-    // [SerializeField] private float starCollectReward = 5.0f;
     [SerializeField] private float crashPenalty = -1.0f;
-    // [DISABLED] Shooting rewards removed — agent cannot shoot anymore
-    // [SerializeField] private float obstacleDestroyedReward = 0.5f;
-    // [SerializeField] private float starDestroyedPenalty = -0.3f;
-    [SerializeField] private float survivalRewardPerStep = 0.01f;
-    // [DISABLED] Shooting penalty removed — no shooting in dodge-only mode
-    // [SerializeField] private float shootPenalty = -0.001f;
-    // [DISABLED] No stars to miss in dodge-only mode
-    // [SerializeField] private float missedStarPenalty = -0.05f;
+    [SerializeField] private float survivalRewardPerStep = 0.001f;
+    [Tooltip("Bonus reward for surviving the full episode")]
+    [SerializeField] private float episodeCompletionBonus = 3.0f;
 
-    [Header("Proximity Shaping")]
-    // [DISABLED] Star proximity shaping removed — no stars in simplified task
-    // [Tooltip("Small reward for being aligned with the nearest star on X/Y plane")]
-    // [SerializeField] private float proximityRewardScale = 0.005f;
-    [Tooltip("Reward for being far from nearest obstacle on X/Y plane")]
-    [SerializeField] private float dodgeRewardScale = 0.01f;
-    // [DISABLED] Star distance tracking removed — not needed without stars
-    // private float _previousXYDistToStar = float.MaxValue;
+    [Header("Anti-Corner Penalty")]
+    [Tooltip("Fraction of range (0-1) that counts as edge zone")]
+    [SerializeField] private float edgeZoneThreshold = 0.75f;
+    [Tooltip("Penalty per step when the agent is in the edge/corner zone")]
+    [SerializeField] private float edgePenaltyPerStep = -0.003f;
+    [Tooltip("Small reward per step for staying near center (within this fraction of range)")]
+    [SerializeField] private float centerZoneThreshold = 0.4f;
+    [SerializeField] private float centerBonusPerStep = 0.0005f;
 
     [Header("Episode Settings")]
     [SerializeField] private ObstacleSpawner obstacleSpawner;
+    [Tooltip("Max steps before episode ends successfully (0 = unlimited)")]
+    [SerializeField] private int maxStepsPerEpisode = 3000;
+
+    [Header("Sector Observations")]
+    [Tooltip("Max observation distance — obstacles further than this are ignored")]
+    [SerializeField] private float maxObservationDistance = 50f;
 
     // Clamp ranges — synced from PlayerMovement in Initialize()
     private float _xRange;
     private float _yRange;
 
+    // Sector boundaries (derived from clamp ranges)
+    private float _sectorXWidth;
+    private float _sectorYHeight;
+
+    // Track previous action for observation
+    private float _lastActionX;
+    private float _lastActionY;
+
+    // 3x3 sector danger grid (reused each frame to avoid GC)
+    private float[] _sectorDanger = new float[9];
+    private float[] _sectorClosestZ = new float[9];
+
     public override void Initialize()
     {
         _playerMovement = GetComponent<PlayerMovement>();
-        // [DISABLED] Weapon not needed for dodge-only task
-        // _playerWeapon = GetComponent<PlayerWeapon>();
         _behaviorParameters = GetComponent<BehaviorParameters>();
         _startingPosition = transform.localPosition;
 
@@ -80,29 +73,50 @@ public class SpaceshipAgent : Agent
         _xRange = _playerMovement.XClampedRange;
         _yRange = _playerMovement.YClampedRange;
 
-        // Add DecisionRequester: decide every 3 steps, repeat last action between decisions
-        if (GetComponent<DecisionRequester>() == null)
+        // Sector boundaries = 1/3 of play area each side
+        _sectorXWidth = _xRange / 3f;
+        _sectorYHeight = _yRange / 3f;
+
+        // Block Input System from overriding agent controls during training
+        if (IsTraining)
         {
-            var dr = gameObject.AddComponent<DecisionRequester>();
-            dr.DecisionPeriod = 3;
-            dr.TakeActionsBetweenDecisions = true;
+            _playerMovement.SetAgentControlled(true);
+
+            // Disable weapon during training to prevent accidental laser firing
+            var weapon = GetComponent<PlayerWeapon>();
+            if (weapon != null) weapon.SetDisabled(true);
         }
+
+        // ===== SANITY CHECK: warn if RayPerceptionSensor is missing =====
+        var raySensors = GetComponentsInChildren<RayPerceptionSensorComponent3D>();
+        if (raySensors.Length == 0)
+        {
+            Debug.LogWarning(
+                "[SpaceshipAgent] No RayPerceptionSensorComponent3D found! " +
+                "Using only sector-based vector observations.");
+        }
+        else
+        {
+            Debug.Log($"[SpaceshipAgent] Found {raySensors.Length} RayPerceptionSensor(s) — OK.");
+        }
+
+        // Add DecisionRequester: decide every 2 steps for faster reactions
+        var dr = GetComponent<DecisionRequester>();
+        if (dr == null)
+        {
+            dr = gameObject.AddComponent<DecisionRequester>();
+        }
+        dr.DecisionPeriod = 2;
+        dr.TakeActionsBetweenDecisions = true;
     }
 
     public override void OnEpisodeBegin()
     {
-        // Reset position and velocity
+        // Reset position and velocity — obstacles keep flying, no clearing!
         transform.localPosition = _startingPosition;
         _playerMovement.SetMovementInput(Vector2.zero);
-
-        // Clear all spawned obstacles from previous episode
-        if (obstacleSpawner != null)
-        {
-            obstacleSpawner.ClearAllObstacles();
-        }
-
-        // [DISABLED] Star proximity tracker no longer needed
-        // _previousXYDistToStar = float.MaxValue;
+        _lastActionX = 0f;
+        _lastActionY = 0f;
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -111,10 +125,7 @@ public class SpaceshipAgent : Agent
         int moveX = actions.DiscreteActions[0];
         // Branch 1: Vertical (0 = Idle, 1 = Up, 2 = Down)
         int moveY = actions.DiscreteActions[1];
-        // [DISABLED] Branch 2 (Shooting) removed — simplified to dodge-only task
-        // int shoot = actions.DiscreteActions[2];
 
-        // Translate the discrete actions into a Vector2 for your movement script
         float xInput = 0f;
         if (moveX == 1) xInput = -1f;
         else if (moveX == 2) xInput = 1f;
@@ -123,105 +134,115 @@ public class SpaceshipAgent : Agent
         if (moveY == 1) yInput = 1f;
         else if (moveY == 2) yInput = -1f;
 
-        // Feed the input to the body
+        _lastActionX = xInput;
+        _lastActionY = yInput;
+
         _playerMovement.SetMovementInput(new Vector2(xInput, yInput));
 
-        // [DISABLED] Shooting action removed for simplified training
-        // if (shoot == 1)
-        // {
-        //     _playerWeapon.FireWeapon();
-        //     AddReward(shootPenalty);
-        // }
+        // ==================== REWARD SHAPING ====================
 
-        // Small survival reward to encourage staying alive
+        // 1) Small survival reward each step
         AddReward(survivalRewardPerStep);
 
-        // [DISABLED] Star proximity shaping removed — no stars in dodge-only mode
-        // GameObject nearestStar = FindNearestWithTag("Star");
-        // if (nearestStar != null)
-        // {
-        //     float dx = nearestStar.transform.position.x - transform.position.x;
-        //     float dy = nearestStar.transform.position.y - transform.position.y;
-        //     float currentXYDist = Mathf.Sqrt(dx * dx + dy * dy);
-        //     if (_previousXYDistToStar < float.MaxValue)
-        //     {
-        //         float delta = _previousXYDistToStar - currentXYDist;
-        //         AddReward(delta * proximityRewardScale);
-        //     }
-        //     _previousXYDistToStar = currentXYDist;
-        // }
-        // else
-        // {
-        //     _previousXYDistToStar = float.MaxValue;
-        // }
-
-        // === Dodge shaping: small reward for keeping X/Y distance from nearest obstacle ===
-        GameObject nearestObstacle = FindNearestWithTag("Obstacle");
-        if (nearestObstacle != null)
+        // 2) Edge/corner penalty — discourages camping at borders
+        float xRatio = Mathf.Abs(transform.localPosition.x) / _xRange;
+        float yRatio = Mathf.Abs(transform.localPosition.y) / _yRange;
+        if (xRatio > edgeZoneThreshold || yRatio > edgeZoneThreshold)
         {
-            float obsDx = nearestObstacle.transform.position.x - transform.position.x;
-            float obsDy = nearestObstacle.transform.position.y - transform.position.y;
-            float obsXYDist = Mathf.Sqrt(obsDx * obsDx + obsDy * obsDy);
-            // Only reward when obstacle is close on Z (within 30 units ahead)
-            float obsZ = nearestObstacle.transform.position.z - transform.position.z;
-            if (obsZ > 0f && obsZ < 30f)
-            {
-                // Normalize: reward scales from 0 (on top of obstacle) to dodgeRewardScale (far away)
-                float normalizedDist = Mathf.Clamp01(obsXYDist / 20f);
-                AddReward(normalizedDist * dodgeRewardScale);
-            }
+            AddReward(edgePenaltyPerStep);
+        }
+        // Small center bonus — being near center gives best dodging options
+        else if (xRatio < centerZoneThreshold && yRatio < centerZoneThreshold)
+        {
+            AddReward(centerBonusPerStep);
+        }
+
+        // 3) End episode with bonus if agent survived the full duration
+        if (maxStepsPerEpisode > 0 && StepCount >= maxStepsPerEpisode)
+        {
+            AddReward(episodeCompletionBonus);
+            EndEpisode();
         }
     }
 
+    // ===================== OBSERVATIONS =====================
+    // Vector obs: 2 (pos) + 2 (action) + 9 (sector grid) = 13
+    // Plus any RayPerceptionSensor3D attached in Inspector (auto-detected)
+
     public override void CollectObservations(VectorSensor sensor)
     {
-        // === 1. Player's own normalized position (2 values) ===
+        // === 1) Player's own normalized position (2 values) ===
         sensor.AddObservation(transform.localPosition.x / _xRange);
         sensor.AddObservation(transform.localPosition.y / _yRange);
 
-        // [DISABLED] Star observations removed — task simplified to obstacle avoidance only
-        // List<GameObject> stars = GetNearestObjectsWithTag("Star", maxStarsToObserve);
-        // for (int i = 0; i < maxStarsToObserve; i++)
-        // {
-        //     if (i < stars.Count)
-        //     {
-        //         Vector3 relativePos = stars[i].transform.position - transform.position;
-        //         sensor.AddObservation(relativePos.x / detectionRange);
-        //         sensor.AddObservation(relativePos.y / detectionRange);
-        //         sensor.AddObservation(relativePos.z / detectionRange);
-        //         ObstacleMover mover = stars[i].GetComponent<ObstacleMover>();
-        //         sensor.AddObservation(mover != null ? mover.MoveSpeed / maxObjectSpeed : 0f);
-        //     }
-        //     else
-        //     {
-        //         sensor.AddObservation(0f);
-        //         sensor.AddObservation(0f);
-        //         sensor.AddObservation(0f);
-        //         sensor.AddObservation(0f);
-        //     }
-        // }
+        // === 2) Last action taken (2 values) — helps predict momentum ===
+        sensor.AddObservation(_lastActionX);
+        sensor.AddObservation(_lastActionY);
 
-        // === 2. Nearest Obstacles AHEAD — relative pos (x,y,z) only, no speed (maxObstaclesToObserve * 3 values) ===
-        // Speed observation removed — all obstacles share the same fixed speed now
-        List<GameObject> obstacles = GetNearestObstaclesAhead(maxObstaclesToObserve);
-        for (int i = 0; i < maxObstaclesToObserve; i++)
+        // === 3) 3×3 Sector danger grid (9 values) ===
+        // Divides the space AHEAD of the player into 9 sectors.
+        // Each sector reports how close the nearest obstacle is (0=safe, 1=imminent).
+        // Spatially consistent: sector 0 is always bottom-left, sector 8 is always top-right.
+        AddSectorDangerObservations(sensor);
+    }
+
+    /// <summary>
+    /// 3×3 sector grid observation. Divides the area ahead into sectors:
+    ///   [6:TL] [7:TC] [8:TR]   (Y > +threshold)
+    ///   [3:ML] [4:MC] [5:MR]   (Y ≈ 0)
+    ///   [0:BL] [1:BC] [2:BR]   (Y < -threshold)
+    /// Each value = 1 - (closestZ / maxDist). Higher = closer = more danger.
+    /// </summary>
+    private void AddSectorDangerObservations(VectorSensor sensor)
+    {
+        // Reset
+        for (int i = 0; i < 9; i++)
         {
-            if (i < obstacles.Count)
+            _sectorDanger[i] = 0f;
+            _sectorClosestZ[i] = maxObservationDistance;
+        }
+
+        if (obstacleSpawner != null)
+        {
+            foreach (GameObject obs in obstacleSpawner.SpawnedObjects)
             {
-                Vector3 relativePos = obstacles[i].transform.position - transform.position;
-                sensor.AddObservation(relativePos.x / detectionRange);
-                sensor.AddObservation(relativePos.y / detectionRange);
-                sensor.AddObservation(relativePos.z / detectionRange);
-            }
-            else
-            {
-                sensor.AddObservation(0f);
-                sensor.AddObservation(0f);
-                sensor.AddObservation(0f);
+                if (obs == null) continue;
+                Vector3 rel = obs.transform.position - transform.position;
+
+                // Only consider obstacles AHEAD (positive Z relative to player)
+                if (rel.z <= 0f || rel.z > maxObservationDistance) continue;
+
+                // Determine X sector: 0=left, 1=center, 2=right
+                int sx;
+                if (rel.x < -_sectorXWidth) sx = 0;
+                else if (rel.x > _sectorXWidth) sx = 2;
+                else sx = 1;
+
+                // Determine Y sector: 0=bottom, 1=middle, 2=top
+                int sy;
+                if (rel.y < -_sectorYHeight) sy = 0;
+                else if (rel.y > _sectorYHeight) sy = 2;
+                else sy = 1;
+
+                int idx = sy * 3 + sx;
+
+                // Keep the closest obstacle per sector
+                if (rel.z < _sectorClosestZ[idx])
+                {
+                    _sectorClosestZ[idx] = rel.z;
+                }
             }
         }
 
-        // Total observations: 2 + (5*3) = 17
+        // Convert to danger values and add to sensor
+        for (int i = 0; i < 9; i++)
+        {
+            if (_sectorClosestZ[i] < maxObservationDistance)
+            {
+                _sectorDanger[i] = 1f - (_sectorClosestZ[i] / maxObservationDistance);
+            }
+            sensor.AddObservation(_sectorDanger[i]);
+        }
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -237,94 +258,16 @@ public class SpaceshipAgent : Agent
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) discreteActionsOut[1] = 1;
         else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) discreteActionsOut[1] = 2;
         else discreteActionsOut[1] = 0;
-
-        // [DISABLED] Shoot branch removed — only 2 branches now (horizontal + vertical)
-        // if (Input.GetKey(KeyCode.Space)) discreteActionsOut[2] = 1;
-        // else discreteActionsOut[2] = 0;
     }
 
     // ==================== REWARD METHODS ====================
 
-    // [DISABLED] Star collection removed — dodge-only task
-    // public void RewardStar()
-    // {
-    //     AddReward(starCollectReward);
-    // }
-
-    // Called by PlayerCollisionHandler when player hits an obstacle
+    /// <summary>
+    /// Called by PlayerCollisionHandler when player hits an obstacle.
+    /// </summary>
     public void Crash()
     {
         AddReward(crashPenalty);
         EndEpisode();
-    }
-
-    // [DISABLED] Shooting rewards removed — agent cannot shoot anymore
-    // public void RewardObstacleDestroyed()
-    // {
-    //     AddReward(obstacleDestroyedReward);
-    // }
-
-    // [DISABLED] No stars to accidentally destroy
-    // public void PenalizeStarDestroyed()
-    // {
-    //     AddReward(starDestroyedPenalty);
-    // }
-
-    // [DISABLED] No stars to miss
-    // public void MissedStar()
-    // {
-    //     AddReward(missedStarPenalty);
-    // }
-
-    // ==================== HELPER METHODS ====================
-    
-    /// <summary>
-    /// Returns the nearest obstacles that are AHEAD of the agent (relative z > 0).
-    /// Obstacles behind the agent are ignored — they pose no threat.
-    /// Sorted by distance so closest threats come first.
-    /// </summary>
-    private List<GameObject> GetNearestObstaclesAhead(int maxCount)
-    {
-        if (obstacleSpawner == null) return new List<GameObject>();
-
-        return obstacleSpawner.SpawnedObjects
-            .Where(obj => obj != null && obj.CompareTag("Obstacle"))
-            .Where(obj => (obj.transform.position.z - transform.position.z) > 0f) // only ahead
-            .Where(obj => Vector3.Distance(transform.position, obj.transform.position) <= detectionRange)
-            .OrderBy(obj => Vector3.Distance(transform.position, obj.transform.position))
-            .Take(maxCount)
-            .ToList();
-    }
-
-    // [DISABLED] Generic tag query — replaced by GetNearestObstaclesAhead for observations
-    // private List<GameObject> GetNearestObjectsWithTag(string objectTag, int maxCount)
-    // {
-    //     if (obstacleSpawner == null) return new List<GameObject>();
-    //     return obstacleSpawner.SpawnedObjects
-    //         .Where(obj => obj != null && obj.CompareTag(objectTag))
-    //         .OrderBy(obj => Vector3.Distance(transform.position, obj.transform.position))
-    //         .Where(obj => Vector3.Distance(transform.position, obj.transform.position) <= detectionRange)
-    //         .Take(maxCount)
-    //         .ToList();
-    // }
-
-    private GameObject FindNearestWithTag(string objectTag)
-    {
-        if (obstacleSpawner == null) return null;
-
-        GameObject nearest = null;
-        float minDist = detectionRange;
-
-        foreach (GameObject obj in obstacleSpawner.SpawnedObjects)
-        {
-            if (obj == null || !obj.CompareTag(objectTag)) continue;
-            float dist = Vector3.Distance(transform.position, obj.transform.position);
-            if (dist < minDist)
-            {
-                minDist = dist;
-                nearest = obj;
-            }
-        }
-        return nearest;
     }
 }

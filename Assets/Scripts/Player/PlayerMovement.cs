@@ -1,10 +1,5 @@
-using System.Diagnostics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Unity.MLAgents;
-using Unity.MLAgents.Sensors;
-using Unity.MLAgents.Actuators;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -21,6 +16,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _rotationSpeed = 20f;
 
     [SerializeField] private GameObject _playerModel;
+
+    // When true, Input System callbacks are blocked (agent controls movement)
+    private bool _isAgentControlled = false;
+
+    public void SetAgentControlled(bool value)
+    {
+        _isAgentControlled = value;
+    }
 
     void Update()
     {
@@ -55,6 +58,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
+        // Block human input when agent is controlling the ship
+        if (_isAgentControlled) return;
         _movementInput = value.Get<Vector2>();
     }
 }

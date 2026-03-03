@@ -1,0 +1,65 @@
+{
+    "Spaceship": {
+        "checkpoints": [
+            {
+                "steps": 14399742,
+                "file_path": "results\\dodgeRaycast2\\Spaceship\\Spaceship-14399742.onnx",
+                "reward": 0.8259687862898174,
+                "creation_time": 1772510660.953729,
+                "auxillary_file_paths": [
+                    "results\\dodgeRaycast2\\Spaceship\\Spaceship-14399742.pt"
+                ]
+            },
+            {
+                "steps": 14599618,
+                "file_path": "results\\dodgeRaycast2\\Spaceship\\Spaceship-14599618.onnx",
+                "reward": null,
+                "creation_time": 1772510928.53673,
+                "auxillary_file_paths": [
+                    "results\\dodgeRaycast2\\Spaceship\\Spaceship-14599618.pt"
+                ]
+            },
+            {
+                "steps": 14799785,
+                "file_path": "results\\dodgeRaycast2\\Spaceship\\Spaceship-14799785.onnx",
+                "reward": 2.3700709907071933,
+                "creation_time": 1772511196.96256,
+                "auxillary_file_paths": [
+                    "results\\dodgeRaycast2\\Spaceship\\Spaceship-14799785.pt"
+                ]
+            },
+            {
+                "steps": 14999898,
+                "file_path": "results\\dodgeRaycast2\\Spaceship\\Spaceship-14999898.onnx",
+                "reward": 2.520093411207199,
+                "creation_time": 1772511468.009582,
+                "auxillary_file_paths": [
+                    "results\\dodgeRaycast2\\Spaceship\\Spaceship-14999898.pt"
+                ]
+            },
+            {
+                "steps": 15000023,
+                "file_path": "results\\dodgeRaycast2\\Spaceship\\Spaceship-15000023.onnx",
+                "reward": 2.2143646279970803,
+                "creation_time": 1772511468.1049852,
+                "auxillary_file_paths": [
+                    "results\\dodgeRaycast2\\Spaceship\\Spaceship-15000023.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 15000023,
+            "file_path": "results\\dodgeRaycast2\\Spaceship.onnx",
+            "reward": 2.2143646279970803,
+            "creation_time": 1772511468.1049852,
+            "auxillary_file_paths": [
+                "results\\dodgeRaycast2\\Spaceship\\Spaceship-15000023.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
