@@ -25,18 +25,16 @@ public class SpaceshipAgent : Agent
 
     [Header("Reward Settings")]
     [SerializeField] private float crashPenalty = -1.0f;
-    [SerializeField] private float survivalRewardPerStep = 0.001f;
+    [Tooltip("Survival is the primary objective — increased weight")]
+    [SerializeField] private float survivalRewardPerStep = 0.005f;
     [Tooltip("Bonus reward for surviving the full episode")]
-    [SerializeField] private float episodeCompletionBonus = 3.0f;
+    [SerializeField] private float episodeCompletionBonus = 2.0f;
 
-    [Header("Anti-Corner Penalty")]
-    [Tooltip("Fraction of range (0-1) that counts as edge zone")]
-    [SerializeField] private float edgeZoneThreshold = 0.75f;
-    [Tooltip("Penalty per step when the agent is in the edge/corner zone")]
-    [SerializeField] private float edgePenaltyPerStep = -0.003f;
-    [Tooltip("Small reward per step for staying near center (within this fraction of range)")]
-    [SerializeField] private float centerZoneThreshold = 0.4f;
-    [SerializeField] private float centerBonusPerStep = 0.0005f;
+    [Header("Active Evasion Reward")]
+    [Tooltip("Bonus per step for moving when close sector shows danger. Prevents idle center-camping.")]
+    [SerializeField] private float activeDodgeBonus = 0.003f;
+    [Tooltip("Minimum close-sector danger value (0-1) to trigger the evasion bonus")]
+    [SerializeField] private float dangerThresholdForBonus = 0.3f;
 
     [Header("Episode Settings")]
     [SerializeField] private ObstacleSpawner obstacleSpawner;
@@ -44,8 +42,10 @@ public class SpaceshipAgent : Agent
     [SerializeField] private int maxStepsPerEpisode = 3000;
 
     [Header("Sector Observations")]
-    [Tooltip("Max observation distance — obstacles further than this are ignored")]
-    [SerializeField] private float maxObservationDistance = 50f;
+    [Tooltip("Far sector grid: planning-ahead distance")]
+    [SerializeField] private float farObservationDistance = 50f;
+    [Tooltip("Close sector grid: immediate danger distance")]
+    [SerializeField] private float closeObservationDistance = 15f;
 
     // Clamp ranges — synced from PlayerMovement in Initialize()
     private float _xRange;
@@ -59,15 +59,22 @@ public class SpaceshipAgent : Agent
     private float _lastActionX;
     private float _lastActionY;
 
-    // 3x3 sector danger grid (reused each frame to avoid GC)
+    // 3x3 sector danger grids — far (planning) + close (immediate), reused to avoid GC
     private float[] _sectorDanger = new float[9];
     private float[] _sectorClosestZ = new float[9];
+    private float[] _sectorDangerClose = new float[9];
+    private float[] _sectorClosestZClose = new float[9];
 
     public override void Initialize()
     {
         _playerMovement = GetComponent<PlayerMovement>();
         _behaviorParameters = GetComponent<BehaviorParameters>();
         _startingPosition = transform.localPosition;
+        PlayerWeapon weaponplayer = GetComponent<PlayerWeapon>();
+        if (weaponplayer != null)
+        {
+            weaponplayer.SetDisabled(true); // Disable weapon during training to prevent accidental firing
+        }
 
         // Sync observation normalization with actual movement clamp ranges
         _xRange = _playerMovement.XClampedRange;
@@ -141,20 +148,22 @@ public class SpaceshipAgent : Agent
 
         // ==================== REWARD SHAPING ====================
 
-        // 1) Small survival reward each step
+        // 1) Survival is the PRIMARY reward — agent must learn to stay alive above all else
         AddReward(survivalRewardPerStep);
 
-        // 2) Edge/corner penalty — discourages camping at borders
-        float xRatio = Mathf.Abs(transform.localPosition.x) / _xRange;
-        float yRatio = Mathf.Abs(transform.localPosition.y) / _yRange;
-        if (xRatio > edgeZoneThreshold || yRatio > edgeZoneThreshold)
+        // 2) Active evasion bonus: reward the agent for MOVING when an obstacle is close.
+        //    This breaks the "stand still in center" local optimum — the agent must actively dodge.
+        bool isMoving = (xInput != 0f || yInput != 0f);
+        if (isMoving)
         {
-            AddReward(edgePenaltyPerStep);
-        }
-        // Small center bonus — being near center gives best dodging options
-        else if (xRatio < centerZoneThreshold && yRatio < centerZoneThreshold)
-        {
-            AddReward(centerBonusPerStep);
+            float maxCloseDanger = 0f;
+            foreach (float d in _sectorDangerClose)
+                maxCloseDanger = Mathf.Max(maxCloseDanger, d);
+
+            if (maxCloseDanger > dangerThresholdForBonus)
+            {
+                AddReward(activeDodgeBonus * maxCloseDanger);
+            }
         }
 
         // 3) End episode with bonus if agent survived the full duration
@@ -166,7 +175,7 @@ public class SpaceshipAgent : Agent
     }
 
     // ===================== OBSERVATIONS =====================
-    // Vector obs: 2 (pos) + 2 (action) + 9 (sector grid) = 13
+    // Vector obs: 2 (pos) + 2 (action) + 9 (far sector grid) + 9 (close sector grid) = 22
     // Plus any RayPerceptionSensor3D attached in Inspector (auto-detected)
 
     public override void CollectObservations(VectorSensor sensor)
@@ -179,11 +188,13 @@ public class SpaceshipAgent : Agent
         sensor.AddObservation(_lastActionX);
         sensor.AddObservation(_lastActionY);
 
-        // === 3) 3×3 Sector danger grid (9 values) ===
-        // Divides the space AHEAD of the player into 9 sectors.
-        // Each sector reports how close the nearest obstacle is (0=safe, 1=imminent).
-        // Spatially consistent: sector 0 is always bottom-left, sector 8 is always top-right.
-        AddSectorDangerObservations(sensor);
+        // === 3) FAR 3×3 Sector danger grid (9 values, up to farObservationDistance) ===
+        // Gives planning-ahead info: what's coming in the next ~50 units
+        AddSectorDangerObservations(sensor, farObservationDistance, _sectorDanger, _sectorClosestZ);
+
+        // === 4) CLOSE 3×3 Sector danger grid (9 values, up to closeObservationDistance) ===
+        // Gives immediate danger: what's RIGHT in front — react NOW
+        AddSectorDangerObservations(sensor, closeObservationDistance, _sectorDangerClose, _sectorClosestZClose);
     }
 
     /// <summary>
@@ -192,14 +203,16 @@ public class SpaceshipAgent : Agent
     ///   [3:ML] [4:MC] [5:MR]   (Y ≈ 0)
     ///   [0:BL] [1:BC] [2:BR]   (Y < -threshold)
     /// Each value = 1 - (closestZ / maxDist). Higher = closer = more danger.
+    /// Call with different maxDist for far (planning) and close (immediate) grids.
     /// </summary>
-    private void AddSectorDangerObservations(VectorSensor sensor)
+    private void AddSectorDangerObservations(VectorSensor sensor, float maxDist,
+        float[] danger, float[] closestZ)
     {
         // Reset
         for (int i = 0; i < 9; i++)
         {
-            _sectorDanger[i] = 0f;
-            _sectorClosestZ[i] = maxObservationDistance;
+            danger[i] = 0f;
+            closestZ[i] = maxDist;
         }
 
         if (obstacleSpawner != null)
@@ -210,7 +223,7 @@ public class SpaceshipAgent : Agent
                 Vector3 rel = obs.transform.position - transform.position;
 
                 // Only consider obstacles AHEAD (positive Z relative to player)
-                if (rel.z <= 0f || rel.z > maxObservationDistance) continue;
+                if (rel.z <= 0f || rel.z > maxDist) continue;
 
                 // Determine X sector: 0=left, 1=center, 2=right
                 int sx;
@@ -227,9 +240,9 @@ public class SpaceshipAgent : Agent
                 int idx = sy * 3 + sx;
 
                 // Keep the closest obstacle per sector
-                if (rel.z < _sectorClosestZ[idx])
+                if (rel.z < closestZ[idx])
                 {
-                    _sectorClosestZ[idx] = rel.z;
+                    closestZ[idx] = rel.z;
                 }
             }
         }
@@ -237,11 +250,11 @@ public class SpaceshipAgent : Agent
         // Convert to danger values and add to sensor
         for (int i = 0; i < 9; i++)
         {
-            if (_sectorClosestZ[i] < maxObservationDistance)
+            if (closestZ[i] < maxDist)
             {
-                _sectorDanger[i] = 1f - (_sectorClosestZ[i] / maxObservationDistance);
+                danger[i] = 1f - (closestZ[i] / maxDist);
             }
-            sensor.AddObservation(_sectorDanger[i]);
+            sensor.AddObservation(danger[i]);
         }
     }
 

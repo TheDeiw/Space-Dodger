@@ -1,0 +1,65 @@
+{
+    "Spaceship": {
+        "checkpoints": [
+            {
+                "steps": 2399975,
+                "file_path": "results\\sectorLSTM1\\Spaceship\\Spaceship-2399975.onnx",
+                "reward": -0.3213333288828532,
+                "creation_time": 1772550782.399516,
+                "auxillary_file_paths": [
+                    "results\\sectorLSTM1\\Spaceship\\Spaceship-2399975.pt"
+                ]
+            },
+            {
+                "steps": 2599915,
+                "file_path": "results\\sectorLSTM1\\Spaceship\\Spaceship-2599915.onnx",
+                "reward": -0.5184999801017143,
+                "creation_time": 1772550989.8850362,
+                "auxillary_file_paths": [
+                    "results\\sectorLSTM1\\Spaceship\\Spaceship-2599915.pt"
+                ]
+            },
+            {
+                "steps": 2799880,
+                "file_path": "results\\sectorLSTM1\\Spaceship\\Spaceship-2799880.onnx",
+                "reward": -0.41920830495655537,
+                "creation_time": 1772551214.8538792,
+                "auxillary_file_paths": [
+                    "results\\sectorLSTM1\\Spaceship\\Spaceship-2799880.pt"
+                ]
+            },
+            {
+                "steps": 2999995,
+                "file_path": "results\\sectorLSTM1\\Spaceship\\Spaceship-2999995.onnx",
+                "reward": -0.7563749775290489,
+                "creation_time": 1772551519.9628372,
+                "auxillary_file_paths": [
+                    "results\\sectorLSTM1\\Spaceship\\Spaceship-2999995.pt"
+                ]
+            },
+            {
+                "steps": 3149239,
+                "file_path": "results\\sectorLSTM1\\Spaceship\\Spaceship-3149239.onnx",
+                "reward": -0.2820262744238502,
+                "creation_time": 1772551735.593233,
+                "auxillary_file_paths": [
+                    "results\\sectorLSTM1\\Spaceship\\Spaceship-3149239.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 3149239,
+            "file_path": "results\\sectorLSTM1\\Spaceship.onnx",
+            "reward": -0.2820262744238502,
+            "creation_time": 1772551735.593233,
+            "auxillary_file_paths": [
+                "results\\sectorLSTM1\\Spaceship\\Spaceship-3149239.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

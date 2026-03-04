@@ -60,15 +60,14 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   crashPenalty: -1
-  survivalRewardPerStep: 0.001
-  episodeCompletionBonus: 3
-  edgeZoneThreshold: 0.75
-  edgePenaltyPerStep: -0.003
-  centerZoneThreshold: 0.4
-  centerBonusPerStep: 0.0005
+  survivalRewardPerStep: 0.005
+  episodeCompletionBonus: 2
+  activeDodgeBonus: 0.003
+  dangerThresholdForBonus: 0.3
   obstacleSpawner: {fileID: 8519811447762515123}
   maxStepsPerEpisode: 3000
-  maxObservationDistance: 50
+  farObservationDistance: 50
+  closeObservationDistance: 15
 --- !u!114 &5875363370664296682
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -82,7 +81,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 13
+    VectorObservationSize: 22
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0

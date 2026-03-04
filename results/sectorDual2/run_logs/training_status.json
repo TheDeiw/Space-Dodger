@@ -1,0 +1,65 @@
+{
+    "Spaceship": {
+        "checkpoints": [
+            {
+                "steps": 2799925,
+                "file_path": "results\\sectorDual2\\Spaceship\\Spaceship-2799925.onnx",
+                "reward": 0.054958248642128955,
+                "creation_time": 1772582820.3191442,
+                "auxillary_file_paths": [
+                    "results\\sectorDual2\\Spaceship\\Spaceship-2799925.pt"
+                ]
+            },
+            {
+                "steps": 2999881,
+                "file_path": "results\\sectorDual2\\Spaceship\\Spaceship-2999881.onnx",
+                "reward": 0.01663583153631629,
+                "creation_time": 1772583098.3706234,
+                "auxillary_file_paths": [
+                    "results\\sectorDual2\\Spaceship\\Spaceship-2999881.pt"
+                ]
+            },
+            {
+                "steps": 3199906,
+                "file_path": "results\\sectorDual2\\Spaceship\\Spaceship-3199906.onnx",
+                "reward": -0.2711763925412122,
+                "creation_time": 1772583369.7101867,
+                "auxillary_file_paths": [
+                    "results\\sectorDual2\\Spaceship\\Spaceship-3199906.pt"
+                ]
+            },
+            {
+                "steps": 3399815,
+                "file_path": "results\\sectorDual2\\Spaceship\\Spaceship-3399815.onnx",
+                "reward": 0.29800018538599427,
+                "creation_time": 1772583642.5596485,
+                "auxillary_file_paths": [
+                    "results\\sectorDual2\\Spaceship\\Spaceship-3399815.pt"
+                ]
+            },
+            {
+                "steps": 3497823,
+                "file_path": "results\\sectorDual2\\Spaceship\\Spaceship-3497823.onnx",
+                "reward": 0.14724210007437344,
+                "creation_time": 1772583772.6595256,
+                "auxillary_file_paths": [
+                    "results\\sectorDual2\\Spaceship\\Spaceship-3497823.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 3497823,
+            "file_path": "results\\sectorDual2\\Spaceship.onnx",
+            "reward": 0.14724210007437344,
+            "creation_time": 1772583772.6595256,
+            "auxillary_file_paths": [
+                "results\\sectorDual2\\Spaceship\\Spaceship-3497823.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

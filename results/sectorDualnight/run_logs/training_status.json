@@ -1,0 +1,83 @@
+{
+    "Spaceship": {
+        "checkpoints": [
+            {
+                "steps": 2999891,
+                "file_path": "results\\sectorDualnight\\Spaceship\\Spaceship-2999891.onnx",
+                "reward": 1.5154155630890915,
+                "creation_time": 1772588212.8363633,
+                "auxillary_file_paths": [
+                    "results\\sectorDualnight\\Spaceship\\Spaceship-2999891.pt"
+                ]
+            },
+            {
+                "steps": 5999748,
+                "file_path": "results\\sectorDualnight\\Spaceship\\Spaceship-5999748.onnx",
+                "reward": 3.795750677585602,
+                "creation_time": 1772592533.5046804,
+                "auxillary_file_paths": [
+                    "results\\sectorDualnight\\Spaceship\\Spaceship-5999748.pt"
+                ]
+            },
+            {
+                "steps": 8999948,
+                "file_path": "results\\sectorDualnight\\Spaceship\\Spaceship-8999948.onnx",
+                "reward": 1.4658152020894564,
+                "creation_time": 1772596872.795588,
+                "auxillary_file_paths": [
+                    "results\\sectorDualnight\\Spaceship\\Spaceship-8999948.pt"
+                ]
+            },
+            {
+                "steps": 11999902,
+                "file_path": "results\\sectorDualnight\\Spaceship\\Spaceship-11999902.onnx",
+                "reward": 2.1731664339701333,
+                "creation_time": 1772601263.2634473,
+                "auxillary_file_paths": [
+                    "results\\sectorDualnight\\Spaceship\\Spaceship-11999902.pt"
+                ]
+            },
+            {
+                "steps": 14999890,
+                "file_path": "results\\sectorDualnight\\Spaceship\\Spaceship-14999890.onnx",
+                "reward": 1.3705961171251078,
+                "creation_time": 1772605873.0359347,
+                "auxillary_file_paths": [
+                    "results\\sectorDualnight\\Spaceship\\Spaceship-14999890.pt"
+                ]
+            },
+            {
+                "steps": 17999764,
+                "file_path": "results\\sectorDualnight\\Spaceship\\Spaceship-17999764.onnx",
+                "reward": 4.177285688264029,
+                "creation_time": 1772610517.7662172,
+                "auxillary_file_paths": [
+                    "results\\sectorDualnight\\Spaceship\\Spaceship-17999764.pt"
+                ]
+            },
+            {
+                "steps": 20354338,
+                "file_path": "results\\sectorDualnight\\Spaceship\\Spaceship-20354338.onnx",
+                "reward": 1.9089090237111757,
+                "creation_time": 1772614025.146233,
+                "auxillary_file_paths": [
+                    "results\\sectorDualnight\\Spaceship\\Spaceship-20354338.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 20354338,
+            "file_path": "results\\sectorDualnight\\Spaceship.onnx",
+            "reward": 1.9089090237111757,
+            "creation_time": 1772614025.146233,
+            "auxillary_file_paths": [
+                "results\\sectorDualnight\\Spaceship\\Spaceship-20354338.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
